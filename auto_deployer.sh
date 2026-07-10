@@ -1,3 +1,5 @@
+#!/bin/bash
+
 REPO_URL=https://github.com/amctheperson/TestApp
 
 printf "\nAUTO DEPLOYER 2026\n\n"
@@ -6,7 +8,9 @@ printf "\t[1/8] Downloading GitHub repo...\n"
 
 # Getting most recent repo and making symbolic links of project files to current directory (required to have gradle work properly while calling it from a separate directory)
 
-git clone $REPO_URL 2>/dev/null
+git clone $REPO_URL 
+#git clone $REPO_URL 2>/dev/null
+
 ln -s TestApp/* .
 
 
@@ -16,6 +20,7 @@ ln -s TestApp/* .
 
 printf "\t[2/8] Assembling unsigned APK..\n"
 
+#TestApp/gradlew assemble
 TestApp/gradlew assemble >/dev/null
 
 
@@ -48,7 +53,14 @@ ln -s TestApp/app/build/outputs/apk/release/ ./
 printf "\t[4/8] Aligning uncompressed APK files for storage optimization..\n"
 
 ./zipalign -P 16 -f 4 release/app-release-unsigned.apk \
-release/app-release-unsigned-but-its-aligned.apk 2>/dev/null
+release/app-release-unsigned-but-its-aligned.apk
+
+
+# ./zipalign -P 16 -f 4 release/app-release-unsigned.apk \
+# release/app-release-unsigned-but-its-aligned.apk 2>/dev/null
+
+printf "This is what is inside the cur directory...\n"
+ls
 
 
 # Sign APK with keystore Java file
@@ -73,8 +85,6 @@ cd TestApp
 # Establishing symbolic links for convenience (and readability)
 
 ln -s app/build/outputs/apk/release/app-release-signed.apk
-ln -s ../local-dependencies/gh_2.95.0_macOS_amd64/bin/gh
-
 
 # Get current commit hash of master branch of repo
 # aka most recently committed hash
@@ -148,7 +158,7 @@ new_link=$(gh release create $tag --latest --notes-file "$new_release_notes_file
 printf "\t[8/8] Release uploaded to GitHub repo. Page link:\n\t\t$new_link\n"
 
 # Removing established symbolic links inside repo directory 
-rm app-release-signed.apk gh
+rm app-release-signed.apk
 
 # Removing established symbolic links in auto_deployer folder from repo
 cd ..
