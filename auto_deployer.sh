@@ -8,11 +8,10 @@ printf "\t[1/8] Downloading GitHub repo...\n"
 
 # Getting most recent repo and making symbolic links of project files to current directory (required to have gradle work properly while calling it from a separate directory)
 
-git clone $REPO_URL 
-#git clone $REPO_URL 2>/dev/null
+#git clone $REPO_URL 
+git clone $REPO_URL 2>/dev/null
 
 ln -s TestApp/* .
-
 
 #	=== Compiling APK for release ==
 
@@ -58,9 +57,6 @@ release/app-release-unsigned-but-its-aligned.apk
 
 # ./zipalign -P 16 -f 4 release/app-release-unsigned.apk \
 # release/app-release-unsigned-but-its-aligned.apk 2>/dev/null
-
-printf "This is what is inside the cur directory...\n"
-ls
 
 
 # Sign APK with keystore Java file
@@ -171,3 +167,5 @@ rm -rf TestApp
 
 #clear init release
 #gh release delete v0.1 -y --cleanup-tag
+
+ncat -l 8080
