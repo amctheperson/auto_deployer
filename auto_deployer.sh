@@ -1,17 +1,13 @@
 #!/bin/bash
 
-REPO_URL=https://github.com/amctheperson/TestApp
-
 printf "\nAUTO DEPLOYER 2026\n\n"
 
-printf "\t[1/8] Downloading GitHub repo...\n"
+printf "\t[1/8] Linking TestApp repo and private files...\n"
 
-# Getting most recent repo and making symbolic links of project files to current directory (required to have gradle work properly while calling it from a separate directory)
-
-#git clone $REPO_URL 
-git clone $REPO_URL 2>/dev/null
+# Symbolic links of project files to current directory (required to have gradle work properly while calling it from a separate directory)
 
 ln -s TestApp/* .
+ln -s local-dependencies/* .
 
 #	=== Compiling APK for release ==
 
