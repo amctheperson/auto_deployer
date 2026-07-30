@@ -67,15 +67,16 @@ if sig_file_path.exists():
 		
 # Main script	
 
-introduction_string = (
-	
-"\nIn order for an Android application .apk file to be fully installable\n" +
-"it needs to be signed with the information of the person\n" +
-"who built the application (presumably for liability reasons).\n\n" +
-\
-"The following prompts will ask and save this info in a local text file\n" +
-"for future build automation.\n"
-
+introduction_string = (	
+	"\n" + 
+	"In order for an Android application .apk file to be fully " + 
+	"installable \n" +
+	"it needs to be signed with the information of the person \n" +
+	"who built the application (presumably for liability reasons)." + 
+	"\n\n" +
+	"The following prompts will ask and save this info in a local " + 
+	"text file \n" +
+	"for future build automation.\n"
 )
 
 print(introduction_string)
