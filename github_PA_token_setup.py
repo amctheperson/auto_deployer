@@ -1,4 +1,6 @@
 import subprocess
+import getpass
+
 
 """
 
@@ -49,9 +51,7 @@ Page	Purpose
 
 
 
-
-
-
+#					0
 
 
 #							            CTRL + F -->
@@ -114,29 +114,69 @@ def isValidToken(supposed_token):
 # <-- CTRL + B							    CTRL + F -->
 
 
+"""
+
+Main script
+
+"""
+
+# Displaying instructions for generating a new Personal Access token
+
 introduction_string = (
 	"\n" +
+
 	"In order to automate GitHub release deployment \n" +  
 	"a valid GitHub PA (Personal Access) Token is required." +
+
 	"\n\n" + 
-	"GitHub PA Token generation can be accessed from this link:" + 
+
+	"GitHub PA Token generation can be accessed from this link:" +
+ 
 	"\n\n\t" + 
-	"https://github.com/settings/tokens/new" + 
+
+		"https://github.com/settings/tokens/new" +
+ 
 	"\n\n" +
+
 	"The token should be generated with the following permissions:\n" + 
-	"\t" + "-repo \t\t(1st category header) \n" + 
-	"\t" + "-read:org \t(subcategory under 4th category header " + 
-	"'admin:org') \n" +
-	"\t" + "-gists \t\t(small category header in middle of the page)" +
+
+		"\t" + "-repo \t\t(1st category header) \n" +
+ 
+		"\t" + "-read:org \t(subcategory under 4th category header " + 
+		"'admin:org') \n" +
+
+		"\t" + "-gists \t\t(small category header in middle of the page)" +
 	"\n\n" +
+
 	"Please verify that the GitHub account being used for PA Token " + 
 	"generation has \n" + 
 	"the ability to update releases in the repo " + 
-	"intended for release deployment. \n"	
-	)
+	"intended for release deployment. \n")
 
 print(introduction_string)
 
+
+
+
+
+
+
+
+
+
+#					2
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
+
+Main script (contd.)
+
+"""
+
+# Asking user to input PA token, ensuring validity
 
 supposed_token_input_message = (
 	"\n" + 
@@ -145,27 +185,41 @@ supposed_token_input_message = (
 	"\n\n\t"
 	)
 
-supposed_token = input(supposed_token_input_message) 
+supposed_token = getpass.getpass(prompt=supposed_token_input_message,
+				 echo_char='*') 
 
 while (not isValidToken(supposed_token)):
 	print(
 		"\n" +
-		f"'{supposed_token}' was not able to authenticate. " +
-		"Please try again. \n"
+		"Provided token could not be verified, " + 
+		"please double-check your input. \n"
 	)
+	supposed_token = getpass.getpass(prompt=supposed_token_input_message,
+					 echo_char='*') 
 
-	supposed_token = input(supposed_token_input_message) 
+
 
 # for testing just pipe env var aka "github auth login <<< ($TOKEN)"
  
 # TODO
-# migrate to getpass for input for sensitivity
-	# https://docs.python.org/3/library/getpass.html
-# save validated_token to text file
+# save validated_token to encrypted env file
+# https://docs.github.com/en/rest/authentication/keeping-your-api-credentials-secure?apiVersion=2026-03-10#use-authentication-credentials-securely-in-your-code
+
+# check for existing token saved
+
+# stretch goal: check for expiration date, may require GitHub REST API usage
+# actually it could only be the GitHub API via HTTP request
+# https://stackoverflow.com/questions/69041150/github-personal-access-token-get-expiry
 
 
 
 
+
+
+
+
+
+#					3
 
 
 # <-- CTRL + B							    CTRL + F -->
