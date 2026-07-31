@@ -1,8 +1,64 @@
 import subprocess
 
+"""
+
+GitHub Personal Access Token Setup
+
+Page	Purpose
+
+1	PA Token Verification Function
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#							            CTRL + F -->
+
 
 """	
-Function: Validating GitHub Personal Access token 
+Personal Access Token Verification Function
 	
 Input:
  
@@ -35,6 +91,28 @@ def isValidToken(supposed_token):
 	if login_process_code == 0: return True
 
 	return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#					1
+
+
+# <-- CTRL + B							    CTRL + F -->
+
 
 introduction_string = (
 	"\n" +
@@ -84,3 +162,11 @@ while (not isValidToken(supposed_token)):
 # migrate to getpass for input for sensitivity
 	# https://docs.python.org/3/library/getpass.html
 # save validated_token to text file
+
+
+
+
+
+
+# <-- CTRL + B							    CTRL + F -->
+
