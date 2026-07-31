@@ -23,36 +23,17 @@ introduction_string = (
 
 print(introduction_string)
 
-login_process_code = 97
-validated_token = None
-while login_process_code != 0:
+# GitHub PA Token authentication
 
-	supposed_token = \
-	(
-		input(
-			"\n" + 
-			"Please enter a GitHub Personal Access Token " + 
-			"meeting the above requirements:" + 
-			"\n\n\t"
-		)
+# Input: (String) supposed_token | token to be validated
 
-	)
+# Output: (boolean) True if token is a valid token that can be used
+# to login to GitHub CLI, False if token is invalid
 
-	# Using subprocess class to run shell commands
+def isValidToken(supposed_token):
 
-		# shell flag required for single command
-
-		# capture_output flag prevents std out and std err
-		# from printing to console and instead can be accessed
-		# as a public class property of CompletedProcess obj 
-		# made from run()
-
-	subprocess.run(	"gh auth logout",
-			shell=True,
-			capture_output=True)
-
-	# return code class property of CompletedProcess
-	# can be used to check if token authenticates successfully (0 if so) 
+	# Use subprocess package to authenticate token via GitHub CLI
+	# Github CLI reauthenticates token even if logged in
 			
 	login_attempt = subprocess.run(	"gh auth login " + 
 						"--with-token " + 
@@ -62,19 +43,31 @@ while login_process_code != 0:
 
 	login_process_code = login_attempt.returncode
 
-	if login_process_code == 0:
-		validated_token = supposed_token
-		break
+	if login_process_code == 0: return True
 
-	print(	"\n" +
-		f"'{supposed_token}' is not a valid GitHub PA token. \n")			
+	return False
 
-#print(login_attempt.returncode)
+supposed_token_input_message = (
+	"\n" + 
+	"Please enter a GitHub Personal Access Token " + 
+	"meeting the above requirements:" + 
+	"\n\n\t"
+	)
+
+supposed_token = input(supposed_token_input_message) 
+
+while (not isValidToken(supposed_token)):
+	print(
+		"\n" +
+		f"'{supposed_token}' was not able to authenticate. " +
+		"Please try again. \n"
+	)
+
+	supposed_token = input(supposed_token_input_message) 
 
 # for testing just pipe env var aka "github auth login <<< ($TOKEN)"
  
 # TODO
 # migrate to getpass for input for sensitivity
 	# https://docs.python.org/3/library/getpass.html
-# turn loop into functions to make loop more readable
 # save validated_token to text file
