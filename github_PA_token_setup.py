@@ -23,52 +23,58 @@ introduction_string = (
 
 print(introduction_string)
 
-supposed_token = \
-(
-	input(
-		"\n" + 
-		"Please enter a GitHub Personal Access Token meeting " + 
-		"the above requirements:" + 
-		"\n\n\t"
+login_process_code = 97
+validated_token = None
+while login_process_code != 0:
+
+	supposed_token = \
+	(
+		input(
+			"\n" + 
+			"Please enter a GitHub Personal Access Token " + 
+			"meeting the above requirements:" + 
+			"\n\n\t"
+		)
+
 	)
 
-)
+	# Using subprocess class to run shell commands
 
-#subprocess.run("testVar='hello Shell'", shell=True)
+		# shell flag required for single command
 
-# Using subprocess class to run shell commands inside Python script
-# making std output of process when completed accessible
-# and turning the byte sequence into a string automatically
+		# capture_output flag prevents std out and std err
+		# from printing to console and instead can be accessed
+		# as a public class property of CompletedProcess obj 
+		# made from run()
 
-# this is good info but there is a discrete easily acessible property
-# for checking if a process ran without errors
+	subprocess.run(	"gh auth logout",
+			shell=True,
+			capture_output=True)
 
-# return code
-		# returns 0 when process has no issues
-		# returns 1 when process has stderror
-
-# documentation says exit code 0 typically means it ran successfully
-
-# we are still capturing output so that error isn't printed to std err console
-
-subprocess.run(	"gh auth logout",
-		shell=True,
-		capture_output=True)
-		
-testCompletedProcess = subprocess.run(	"gh auth login " + 
-					"--with-token " + 
+	# return code class property of CompletedProcess
+	# can be used to check if token authenticates successfully (0 if so) 
+			
+	login_attempt = subprocess.run(	"gh auth login " + 
+						"--with-token " + 
 						f" <<< '{supposed_token}'", 
 					shell=True,
 					capture_output=True)
 
-# removing trailing white space
+	login_process_code = login_attempt.returncode
 
-#testString = testCompletedProcess.stderr.rstrip()
+	if login_process_code == 0:
+		validated_token = supposed_token
+		break
 
-print(testCompletedProcess.returncode)
-#print(testString)
-#print(len(testString))
+	print(	"\n" +
+		f"'{supposed_token}' is not a valid GitHub PA token. \n")			
 
+#print(login_attempt.returncode)
 
-# TODO call bash and gh auth login PA token via txt file
-# for testing just pipe env var aka "github auth login <<< ($TOKEN)" 	
+# for testing just pipe env var aka "github auth login <<< ($TOKEN)"
+ 
+# TODO
+# migrate to getpass for input for sensitivity
+	# https://docs.python.org/3/library/getpass.html
+# turn loop into functions to make loop more readable
+# save validated_token to text file
