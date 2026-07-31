@@ -4,15 +4,15 @@ import getpass
 
 """
 
-GitHub Personal Access Token Setup
+			GitHub Personal Access Token Setup
 
-Page	Purpose
+	Page	Purpose
 
-1	PA Token Verification Function
+	1	PA Token Verification Function
+	
+	2-3	Main script
 
 """
-
-
 
 
 
@@ -197,20 +197,47 @@ while (not isValidToken(supposed_token)):
 	supposed_token = getpass.getpass(prompt=supposed_token_input_message,
 					 echo_char='*') 
 
+valid_token = supposed_token
 
+# Saving valid token to local .env file
+# GitHub docs recommend this when using PA tokens in code
+
+with open('.env', 'w') as file:
+	file.write(f"GITHUB_CLI_KEY={valid_token}")
+
+authentication_complete_message = ("\n" +
+	"Token verified and saved to local file. \n"
+)
+
+# Note to self:
+
+# loading token into bash script is simple as
+
+# source .env
+# github auth login <<< $GITHUB_CLI_KEY
+
+print(authentication_complete_message)
 
 # for testing just pipe env var aka "github auth login <<< ($TOKEN)"
  
+
+#					3
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
 # TODO
-# save validated_token to encrypted env file
-# https://docs.github.com/en/rest/authentication/keeping-your-api-credentials-secure?apiVersion=2026-03-10#use-authentication-credentials-securely-in-your-code
 
 # check for existing token saved
+# double checks for saving to file and attempting to change key
 
 # stretch goal: check for expiration date, may require GitHub REST API usage
 # actually it could only be the GitHub API via HTTP request
 # https://stackoverflow.com/questions/69041150/github-personal-access-token-get-expiry
 
+# Stretch goal 2: encrypt env file with dotenvx
+# https://dotenvx.com/docs/secrets-in-python
 
 
 
@@ -219,7 +246,38 @@ while (not isValidToken(supposed_token)):
 
 
 
-#					3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#					4
 
 
 # <-- CTRL + B							    CTRL + F -->
