@@ -1,5 +1,41 @@
 import subprocess
 
+
+"""	
+Function: Validating GitHub Personal Access token 
+	
+Input:
+ 
+	(String) supposed_token | token to be validated
+
+Output:
+
+	(boolean) 
+	True = token is valid and can be used to log in to GitHub CLI
+	False = token is invalid
+"""
+
+def isValidToken(supposed_token):
+
+	# Note: Github CLI reauthenticates token even if logged in already
+	# Therefore 'gh auth logout' is unnecessary
+
+	# Use subprocess package to attempt token authentication 
+	
+	login_attempt = subprocess.run(	"gh auth login " + 
+						"--with-token " + 
+						f" <<< '{supposed_token}'", 
+					shell=True,
+					capture_output=True)
+
+	# Get exit code of token authentication attempt subprocess
+
+	login_process_code = login_attempt.returncode
+
+	if login_process_code == 0: return True
+
+	return False
+
 introduction_string = (
 	"\n" +
 	"In order to automate GitHub release deployment \n" +  
@@ -23,29 +59,6 @@ introduction_string = (
 
 print(introduction_string)
 
-# GitHub PA Token authentication
-
-# Input: (String) supposed_token | token to be validated
-
-# Output: (boolean) True if token is a valid token that can be used
-# to login to GitHub CLI, False if token is invalid
-
-def isValidToken(supposed_token):
-
-	# Use subprocess package to authenticate token via GitHub CLI
-	# Github CLI reauthenticates token even if logged in
-			
-	login_attempt = subprocess.run(	"gh auth login " + 
-						"--with-token " + 
-						f" <<< '{supposed_token}'", 
-					shell=True,
-					capture_output=True)
-
-	login_process_code = login_attempt.returncode
-
-	if login_process_code == 0: return True
-
-	return False
 
 supposed_token_input_message = (
 	"\n" + 
