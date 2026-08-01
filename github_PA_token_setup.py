@@ -1,6 +1,8 @@
 import subprocess
 import getpass
+import sys
 
+from pathlib import Path
 
 """
 
@@ -9,16 +11,14 @@ import getpass
 	Page	Purpose
 
 	1	PA Token Verification Function
-	
-	2-3	Main script
+
+	2	Get Info on Current Token's GitHub Authentication Function 
+
+	3	Confirmer function
+			
+	4-6	Main script
 
 """
-
-
-
-
-
-
 
 
 
@@ -115,8 +115,179 @@ def isValidToken(supposed_token):
 
 
 """
+Get Info on Current Token's GitHub Authentication Function 
 
-Main script
+Parses command-line output of 'gh auth status' to get relevant info to user
+(Current authenticated Github account username, current token perms) 
+
+Note:
+ 	
+	Function will raise RuntimeError if no GitHub account is currently
+	logged in
+
+Input:
+ 	
+	None
+
+Output:
+	Tuple of strings ->
+		String including GitHub account username
+		String including Github token perms	
+
+"""
+
+def getCurrentAuthenticationInfo():
+
+	auth_status_process = subprocess.run(	'gh auth status -a',
+						shell=True,
+						capture_output=True,
+						text=True)
+	if auth_status_process.returncode != 0:
+		raise RuntimeError(
+			"Cannot get current authentication info \n" + 
+			"when no GitHub account is currently logged in. \n")
+		return None
+	
+	auth_status_stringList = auth_status_process.stdout.split('\n')
+	auth_status_stringList.pop()
+	
+	account_info_string = auth_status_stringList[1]
+	token_perms_string = auth_status_stringList[5]
+	
+	return (account_info_string, token_perms_string)
+
+
+
+
+
+
+
+
+
+
+#					2
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
+Confirmer function
+
+For general use, requires user to input a 'y' or 'n'
+
+Note to self: 
+	Migrate this function to new Python script class 
+	so it can be used for future scripts 
+	and refactor signature_setup script with this
+
+Input:
+
+	(String)  prompt | Message to user explaining confirmation
+
+Output:
+
+	(String) response | User's confirmation -> either 'y' or 'n'
+ 
+"""
+
+def confirmer(prompt):
+	
+	response = input(	"\n" + 
+				prompt + " (y/n): " + 
+				"\n\n\t")
+	
+	while(response != 'y' and response != 'n'):
+		print(	"\n" + 
+			f"'{response}' is not a valid response. \n")
+		
+		response = input(	"\n" + 
+					prompt + " (y/n): " + 
+					"\n\n\t")
+	return response	
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#					3
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
+
+Main script 
+
+"""
+
+# Checking for existing token and verifying user wants to continue with setup
+
+env_file_path = Path('./.env')
+if env_file_path.exists():
+	curAccountInfo, curTokenPerms = getCurrentAuthenticationInfo()
+	print(	"\n" +
+		"A token is already being used in the following manner: \n" +
+		curAccountInfo + "\n" +
+		curTokenPerms + "\n")
+	
+	if confirmer("Confirm that this token can be overwritten") == 'n':
+		print(	"\n" +
+			"Existing token remains unchanged. \n")
+		sys.exit(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+#					4
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
+
+Main script (contd.)
 
 """
 
@@ -164,7 +335,7 @@ print(introduction_string)
 
 
 
-#					2
+#					5
 
 
 # <-- CTRL + B							    CTRL + F -->
@@ -221,7 +392,7 @@ print(authentication_complete_message)
 # for testing just pipe env var aka "github auth login <<< ($TOKEN)"
  
 
-#					3
+#					6
 
 
 # <-- CTRL + B							    CTRL + F -->
@@ -229,8 +400,10 @@ print(authentication_complete_message)
 
 # TODO
 
-# check for existing token saved
-# double checks for saving to file and attempting to change key
+# Function for loading env file and getting current key
+
+# Final double check for saving to file and attempting to change key
+# Confirmer message migration to new script
 
 # stretch goal: check for expiration date, may require GitHub REST API usage
 # actually it could only be the GitHub API via HTTP request
@@ -275,10 +448,8 @@ print(authentication_complete_message)
 
 
 
+#					7
 
 
-#					4
-
-
-# <-- CTRL + B							    CTRL + F -->
+# <-- CTRL + B							    
 
