@@ -247,13 +247,12 @@ def getCurrentToken():
 
 	# Query authentication statuses and receive JSON string as a response
 
-	auth_status_process = subprocess.run(	"gh auth status " +
+	auth_status_process = subprocess.run(	"gh auth status -a " +
 							"--json hosts " +
 							"--show-token",
 						shell=True,
 						capture_output=True,
 						text=True)
-
 
 	# Raise error if GitHub CLI was never authenticated
 	# Detected by non-zero exit code when querying authentication status
@@ -270,76 +269,20 @@ def getCurrentToken():
 
 		return None
 
-
 	# Load JSON string into Json object  
 	
-	authentication_json = json.loads(auth_status_process.stdout) \
-
-	# Note: Python interprets these page number comments
-	# as ending the definition of a function when untabbed 
-	# therefore this page has to remain tabbed
-
-	#				4
+	authentication_json = json.loads(auth_status_process.stdout)
 
 
-	# <-- CTRL + B						    CTRL + F -->
+	# Parse JSON for token of active Github account
+
+	active_account = authentication_json["hosts"]["github.com"][0]
+	return active_account["token"]
+
+#					4
 
 
-	"""
-	Get Current Token Function (contd.)
-
-	"""
-
-	# Note: Same for this header
-
-		
-
-	# Parse JSON for Github account list
-
-	github_accounts_list = authentication_json["hosts"]["github.com"]
-
-
-	# Linear search Github account list until active account is found
-	# and access token field
-
-	for account in github_accounts_list:
-		if account["active"] == True: 
-			return account["token"]
-	
-	# If no active account found in search then raise error
-	
-	no_active_account_message = ("\t" + 
-		"No token-authenticated Github account" +
-		"\n\t\t" + 
-		"is active right now \n")
-
-	raise LookupError(no_active_account_message)	
-
-	return None	 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#					5
-
-
-# <-- CTRL + B							    CTRL + F -->
+# <-- CTRL + B						    	    CTRL + F -->
 
 
 """
@@ -350,6 +293,7 @@ Main script
 
 # Checking for existing token (via local file) 
 # and confirming token setup continuation
+
 
 
 env_file_path = Path('./.env')
@@ -391,9 +335,8 @@ if env_file_path.exists():
 
 
 
-
 	
-#					6
+#					5
 
 
 # <-- CTRL + B							    CTRL + F -->
@@ -450,7 +393,7 @@ print(authentication_complete_message)
 # for testing just pipe env var aka "github auth login <<< ($TOKEN)"
  
 
-#					7
+#					6
 
 
 # <-- CTRL + B							    CTRL + F -->
@@ -458,9 +401,10 @@ print(authentication_complete_message)
 
 # TODO
 
+# Refactor get authentication info with JSON parsing functionality
+
 # Final double check for saving to file and attempting to change key
 
-# Refactor get authentication info with JSON parsing functionality
 
 # Confirmer message migration to new script
 
@@ -505,8 +449,7 @@ print(authentication_complete_message)
 
 
 
-
-#					8
+#					7
 
 
 # <-- CTRL + B							    
