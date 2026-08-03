@@ -17,9 +17,9 @@ from pathlib import Path
 
 	3	Confirmer function
 			
-	4-5	Get Current Token Function
+	5	Get Current Token Function
 
-	6-7	Main script
+	5-8	Main script
 
 """
 
@@ -162,9 +162,9 @@ def getCurrentTokenInfo():
 
 	username_string = info_list[0] 
 	token_perms_list = info_list[1].split(',') 
-	
-	return (username_string, token_perms_list)
+	token_perms_list = [item.strip() for item in token_perms_list]
 
+	return (username_string, token_perms_list)
 #					2
 
 
@@ -308,7 +308,7 @@ if env_file_path.exists():
 		"and with the following permissions: \n")
 
 	for perm in curTokenPerms:
-		print("\t" + f"-{perm} \n")
+		print("\t" + f"- {perm}")
   	
 	if confirmer("Confirm that this token should be overwritten") == 'n':
 		print(	"\n" +
@@ -348,6 +348,64 @@ Main script (contd.)
 
 """
 
+# Displaying instructions for generating a new Personal Access token
+
+introduction_string = (
+	"\n" +
+
+	"In order to automate GitHub release deployment \n" +  
+	"a valid GitHub PA (Personal Access) Token is required." +
+
+	"\n\n" + 
+
+	"GitHub PA Token generation can be accessed from this link:" +
+ 
+	"\n\n\t" + 
+
+		"https://github.com/settings/tokens/new" +
+ 
+	"\n\n" +
+
+	"The token should be generated with the following permissions:\n" + 
+
+		"\t" + "-repo \t\t(1st category header) \n" +
+ 
+		"\t" + "-read:org \t(subcategory under 4th category header " + 
+		"'admin:org') \n" +
+
+		"\t" + "-gists \t\t(small category header in middle of the page)" +
+	"\n\n" +
+
+	"Please verify that the GitHub account being used for PA Token " + 
+	"generation has \n" + 
+	"the ability to update releases in the repo " + 
+	"intended for release deployment. \n")
+
+print(introduction_string)
+
+
+
+
+
+
+
+
+
+
+#					6
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
+
+Main script (contd.)
+
+"""
+
+cur_token = getCurrentToken()
+
 # Asking user to input PA token, ensuring validity
 
 supposed_token_input_message = (
@@ -368,40 +426,93 @@ while (not isValidToken(supposed_token)):
 	)
 	supposed_token = getpass.getpass(prompt=supposed_token_input_message,
 					 echo_char='*') 
+old_token = cur_token
+new_token = supposed_token
 
-valid_token = supposed_token
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#					7
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
+
+Main script (contd.)
+
+"""
+
+# Final confirmation of token change
+
+print(	"\n" +
+	"Provided token will authenticate Github " +
+	f"account '{curUsername}'\n" + 
+	"with the following permissions: \n")
+print(curTokenPerms)
+for perm in curTokenPerms:
+	print("\t" + f"- {perm}")
+
+if confirmer("Confirm that this token should be used") == 'n':
+	
+	# new_token was authenticated when verifying
+	# so revert back to old_token if user declines confirmation
+	
+	subprocess.run(	"gh auth login " + 
+				"--with-token " + 
+				f" <<< '{old_token}'", 
+			shell=True,
+			capture_output=True)
+		
+	print(	"\n" +
+		"Existing token remains unchanged. \n")
+	sys.exit(0)
 
 # Saving valid token to local .env file
 # GitHub docs recommend this when using PA tokens in code
 
 with open('.env', 'w') as file:
-	file.write(f"GITHUB_CLI_KEY={valid_token}")
+	file.write(f"GITHUB_CLI_KEY={new_token}")
 
 authentication_complete_message = ("\n" +
-	"Token verified and saved to local file. \n"
+	"Provided token was saved to local file and is now active. \n"
 )
-
-# Note to self:
-
-# loading token into bash script is simple as
-
-# source .env
-# github auth login <<< $GITHUB_CLI_KEY
 
 print(authentication_complete_message)
 
-# for testing just pipe env var aka "github auth login <<< ($TOKEN)"
- 
 
-#					6
+
+
+
+
+
+
+
+#					8
 
 
 # <-- CTRL + B							    CTRL + F -->
 
 
 # TODO
-
-# Final double check for saving to file and attempting to change key
 
 
 # Confirmer message migration to new script
@@ -449,7 +560,9 @@ print(authentication_complete_message)
 
 
 
-#					7
+
+
+#					9
 
 
 # <-- CTRL + B							    
