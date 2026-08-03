@@ -1,6 +1,7 @@
 import subprocess
 import getpass
 import sys
+import json
 
 from pathlib import Path
 
@@ -16,12 +17,11 @@ from pathlib import Path
 
 	3	Confirmer function
 			
-	4-6	Main script
+	4-5	Get Current Token Function
+
+	6-7	Main script
 
 """
-
-
-
 
 
 
@@ -229,16 +229,138 @@ def confirmer(prompt):
 
 
 """
+Get Current Token Function
+
+Uses Github CLI tool to query about all authentications 
+and parses the JSON output to find the active account's token
+
+Input:
+
+	None
+
+Output:
+	(String) | Current token (used for the active GitHub account)
+
+"""
+
+def getCurrentToken():
+
+	# Query authentication statuses and receive JSON string as a response
+
+	auth_status_process = subprocess.run(	"gh auth status " +
+							"--json hosts " +
+							"--show-token",
+						shell=True,
+						capture_output=True,
+						text=True)
+
+
+	# Raise error if GitHub CLI was never authenticated
+	# Detected by non-zero exit code when querying authentication status
+
+	if auth_status_process.returncode != 0:
+
+		logged_out_error_message = ("\t" +
+			"No tokens have been used to authenticate a Github " +
+			"account"+ 
+			"\n\t\t" + 
+			"on the CLI yet \n") 
+			
+		raise LookupError(logged_out_error_message)
+
+		return None
+
+
+	# Load JSON string into Json object  
+	
+	authentication_json = json.loads(auth_status_process.stdout) \
+
+	# Note: Python interprets these page number comments
+	# as ending the definition of a function when untabbed 
+	# therefore this page has to remain tabbed
+
+	#				4
+
+
+	# <-- CTRL + B						    CTRL + F -->
+
+
+	"""
+	Get Current Token Function (contd.)
+
+	"""
+
+	# Note: Same for this header
+
+		
+
+	# Parse JSON for Github account list
+
+	github_accounts_list = authentication_json["hosts"]["github.com"]
+
+
+	# Linear search Github account list until active account is found
+	# and access token field
+
+	for account in github_accounts_list:
+		if account["active"] == True: 
+			return account["token"]
+	
+	# If no active account found in search then raise error
+	
+	no_active_account_message = ("\t" + 
+		"No token-authenticated Github account" +
+		"\n\t\t" + 
+		"is active right now \n")
+
+	raise LookupError(no_active_account_message)	
+
+	return None	 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#					5
+
+
+# <-- CTRL + B							    CTRL + F -->
+
+
+"""
 
 Main script 
 
 """
 
-# Checking for existing token and verifying user wants to continue with setup
+# Checking for existing token (via local file) 
+# and confirming token setup continuation
+
 
 env_file_path = Path('./.env')
+
 if env_file_path.exists():
+
 	curAccountInfo, curTokenPerms = getCurrentAuthenticationInfo()
+
+	# Note that f-strings are not used for printing here because
+	# these variables are already strings
+
 	print(	"\n" +
 		"A token is already being used in the following manner: \n" +
 		curAccountInfo + "\n" +
@@ -270,72 +392,8 @@ if env_file_path.exists():
 
 
 
-
-
-
-
-
-
-
-
 	
-#					4
-
-
-# <-- CTRL + B							    CTRL + F -->
-
-
-"""
-
-Main script (contd.)
-
-"""
-
-# Displaying instructions for generating a new Personal Access token
-
-introduction_string = (
-	"\n" +
-
-	"In order to automate GitHub release deployment \n" +  
-	"a valid GitHub PA (Personal Access) Token is required." +
-
-	"\n\n" + 
-
-	"GitHub PA Token generation can be accessed from this link:" +
- 
-	"\n\n\t" + 
-
-		"https://github.com/settings/tokens/new" +
- 
-	"\n\n" +
-
-	"The token should be generated with the following permissions:\n" + 
-
-		"\t" + "-repo \t\t(1st category header) \n" +
- 
-		"\t" + "-read:org \t(subcategory under 4th category header " + 
-		"'admin:org') \n" +
-
-		"\t" + "-gists \t\t(small category header in middle of the page)" +
-	"\n\n" +
-
-	"Please verify that the GitHub account being used for PA Token " + 
-	"generation has \n" + 
-	"the ability to update releases in the repo " + 
-	"intended for release deployment. \n")
-
-print(introduction_string)
-
-
-
-
-
-
-
-
-
-
-#					5
+#					6
 
 
 # <-- CTRL + B							    CTRL + F -->
@@ -392,7 +450,7 @@ print(authentication_complete_message)
 # for testing just pipe env var aka "github auth login <<< ($TOKEN)"
  
 
-#					6
+#					7
 
 
 # <-- CTRL + B							    CTRL + F -->
@@ -400,9 +458,10 @@ print(authentication_complete_message)
 
 # TODO
 
-# Function for loading env file and getting current key
-
 # Final double check for saving to file and attempting to change key
+
+# Refactor get authentication info with JSON parsing functionality
+
 # Confirmer message migration to new script
 
 # stretch goal: check for expiration date, may require GitHub REST API usage
@@ -447,8 +506,7 @@ print(authentication_complete_message)
 
 
 
-
-#					7
+#					8
 
 
 # <-- CTRL + B							    
