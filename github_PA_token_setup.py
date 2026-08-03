@@ -117,13 +117,8 @@ def isValidToken(supposed_token):
 """
 Get Info on Current Token's GitHub Authentication Function 
 
-Parses command-line output of 'gh auth status' to get relevant info to user
-(Current authenticated Github account username, current token perms) 
-
-Note:
- 	
-	Function will raise RuntimeError if no GitHub account is currently
-	logged in
+Queries the active Github account token information via the GitHub CLI
+about the current token's info relevant to the user (username and perms)
 
 Input:
  	
@@ -136,34 +131,39 @@ Output:
 
 """
 
-def getCurrentAuthenticationInfo():
+def getCurrentTokenInfo():
 
-	auth_status_process = subprocess.run(	'gh auth status -a',
-						shell=True,
-						capture_output=True,
-						text=True)
-	if auth_status_process.returncode != 0:
+	info_query = subprocess.run(	"gh auth status " + 
+					"--active " + 
+					"--json hosts " + 
+					"--jq " + "\'" +
+						'.hosts' +
+						'[\"github.com\"]' +
+						'[0]' +
+						'[\"login\"]'
+							+ ','
+						'.hosts' +
+						'[\"github.com\"]' +
+						'[0]' +
+						'[\"scopes\"]'	
+						+ "\'",
+					shell=True,
+					capture_output=True,
+					text=True)
+
+	if info_query.returncode != 0:
 		raise RuntimeError(
 			"Cannot get current authentication info \n" + 
 			"when no GitHub account is currently logged in. \n")
-		return None
+		return None, None
 	
-	auth_status_stringList = auth_status_process.stdout.split('\n')
-	auth_status_stringList.pop()
+	info_list = info_query.stdout.split('\n')
+	info_list.pop()
+
+	username_string = info_list[0] 
+	token_perms_list = info_list[1].split(',') 
 	
-	account_info_string = auth_status_stringList[1]
-	token_perms_string = auth_status_stringList[5]
-	
-	return (account_info_string, token_perms_string)
-
-
-
-
-
-
-
-
-
+	return (username_string, token_perms_list)
 
 #					2
 
@@ -245,19 +245,26 @@ Output:
 
 def getCurrentToken():
 
-	# Query authentication statuses and receive JSON string as a response
+	# Query authentication statuses 
+	# Filtering Github CLI JSON string output via jq expression
 
-	auth_status_process = subprocess.run(	"gh auth status -a " +
-							"--json hosts " +
-							"--show-token",
+	query = subprocess.run(	"gh auth status " + 
+						"--active " +
+						"--json hosts " +
+						"--show-token " + 
+						"--jq " + 
+							"\'.hosts" +
+							"[\"github.com\"]" +
+							"[0]" +
+							"[\"token\"]\'",
 						shell=True,
 						capture_output=True,
 						text=True)
-
+	
 	# Raise error if GitHub CLI was never authenticated
-	# Detected by non-zero exit code when querying authentication status
+	# Detected by non-zero exit code when querying 
 
-	if auth_status_process.returncode != 0:
+	if query.returncode != 0:
 
 		logged_out_error_message = ("\t" +
 			"No tokens have been used to authenticate a Github " +
@@ -269,15 +276,8 @@ def getCurrentToken():
 
 		return None
 
-	# Load JSON string into Json object  
-	
-	authentication_json = json.loads(auth_status_process.stdout)
+	return query.stdout
 
-
-	# Parse JSON for token of active Github account
-
-	active_account = authentication_json["hosts"]["github.com"][0]
-	return active_account["token"]
 
 #					4
 
@@ -300,17 +300,17 @@ env_file_path = Path('./.env')
 
 if env_file_path.exists():
 
-	curAccountInfo, curTokenPerms = getCurrentAuthenticationInfo()
-
-	# Note that f-strings are not used for printing here because
-	# these variables are already strings
+	curUsername, curTokenPerms = getCurrentTokenInfo()
 
 	print(	"\n" +
-		"A token is already being used in the following manner: \n" +
-		curAccountInfo + "\n" +
-		curTokenPerms + "\n")
-	
-	if confirmer("Confirm that this token can be overwritten") == 'n':
+		"A token is already being used for Github " +
+		f"account '{curUsername}'\n" + 
+		"and with the following permissions: \n")
+
+	for perm in curTokenPerms:
+		print("\t" + f"-{perm} \n")
+  	
+	if confirmer("Confirm that this token should be overwritten") == 'n':
 		print(	"\n" +
 			"Existing token remains unchanged. \n")
 		sys.exit(0)
@@ -401,8 +401,6 @@ print(authentication_complete_message)
 
 # TODO
 
-# Refactor get authentication info with JSON parsing functionality
-
 # Final double check for saving to file and attempting to change key
 
 
@@ -414,6 +412,8 @@ print(authentication_complete_message)
 
 # Stretch goal 2: encrypt env file with dotenvx
 # https://dotenvx.com/docs/secrets-in-python
+
+
 
 
 
